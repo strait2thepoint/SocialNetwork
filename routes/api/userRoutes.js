@@ -23,7 +23,9 @@ router.route('/:userId')
 .delete(deleteUser);
 
 // /api/users/:userId/reactions
-// router.route('/:userId/reactions') 
+router.route('/:userId/reactions') 
+  .post(addReaction)  // Endpoint for adding a reaction to a user
+  .delete(removeReaction);  // Endpoint for removing a reaction from a user
 
 // /api/students/:userId/reactions/:reactionId
 router.route('/:userId/reactions/:reactionId')
