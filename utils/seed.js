@@ -1,6 +1,7 @@
 const connection = require('../config/connection');
 const { Thought, User } = require('../models');
-const { getRandomName, getRandomReactions } = require('./data');
+const thoughtData = require('./thoughtData');
+const userData = require('./userData');
 
 connection.on('error', (err) => err);
 
@@ -13,39 +14,37 @@ connection.once('open', async () => {
   // Drop existing users
   await User.deleteMany({});
 
-  // Create empty array to hold the users
-  const users = [];
+  // Add users to the collection and await the results
+  await User.collection.insertMany(userData);
 
   // Loop 20 times -- add users to the users array
-  for (let i = 0; i < 20; i++) {
-    // Get some random reaction objects using a helper function that we imported from ./data
-    const reactions = getRandomReactions(20);
+for (let i = 0; i < 20; i++) {
+  const reactions = getRandomReactions(20);
 
-    const fullName = getRandomName();
-    const first = fullName.split(' ')[0];
-    const last = fullName.split(' ')[1];
-    const github = `${first}${Math.floor(Math.random() * (99 - 18 + 1) + 18)}`;
+  const fullName = getRandomName();
+  const first = fullName.split(' ')[0];
+  const last = fullName.split(' ')[1];
+  const email = `${first.toLowerCase()}@example.com`; // Example email generation
+  const username = `${first}${Math.floor(Math.random() * (99 - 18 + 1) + 18)}`;
 
-    users.push({
-      first,
-      last,
-      github,
-      reactions,
-    });
-  }
-
-  // Add users to the collection and await the results
-  await User.collection.insertMany(users);
+  users.push({
+    first,
+    last,
+    email,
+    username,
+    reactions,
+  });
+}
 
   // Add Thoughts to the collection and await the results
-  await Thought.collection.insertOne({
+await Thought.insertMany([
+  {
     thoughtName: 'My Thoughts',
     inPerson: false,
-    users: [...users],
-  });
+    users: users,
+  }
+]);
 
-  // Log out the seed data to indicate what should appear in the database
-  console.table(users);
-  console.info('Seeding complete! 🌱');
+  console.log('Seeding complete! 🌱');
   process.exit(0);
 });
