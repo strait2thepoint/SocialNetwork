@@ -1,4 +1,4 @@
-const { Thought, User } = require('../models');
+const { Thought, User, Reaction } = require('../models');
 
 module.exports = {
   // Get all thoughts
@@ -21,7 +21,7 @@ module.exports = {
   // Create a thought
   createThought(req, res) {
     Thought.create(req.body)
-      .then((course) => res.json(thought))
+      .then((thought) => res.json(thought))
       .catch((err) => {
         console.log(err);
         return res.status(500).json(err);
@@ -48,8 +48,52 @@ module.exports = {
       .then((thought) =>
         !thought
           ? res.status(404).json({ message: 'No thought with this id!' })
-          : res.json(course)
+          : res.json(thought)
       )
       .catch((err) => res.status(500).json(err));
   },
+  createReaction(req, res) {
+    const { thoughtId } = req.params;
+    const { reactionData } = req.body;
+  
+    //To interact with the Reaction model/schema
+    const newReaction = new Reaction(reactionData);
+  
+    newReaction.save()
+      .then((reaction) => {
+        return Thought.findOneAndUpdate(
+          { _id: thoughtId },
+          { $push: { reactions: reaction._id } },
+          { new: true }
+        );
+      })
+      .then((updatedThought) => {
+        if (!updatedThought) {
+          throw new Error('No thought found with the provided ID');
+        }
+        res.json(updatedThought);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to create reaction' });
+      });
+  },
+  // Delete a reaction
+deleteReaction(req, res) {
+  const { thoughtId, reactionId } = req.params;
+
+  Thought.findOneAndUpdate(
+    { _id: thoughtId },
+    { $pull: { reactions: reactionId } },
+    { new: true }
+  )
+    .then((updatedThought) => {
+      if (!updatedThought) {
+        return res.status(404).json({ message: 'No thought with that ID' });
+      }
+      res.json(updatedThought);
+    })
+    .catch((err) => res.status(500).json(err));
+},
+
 };

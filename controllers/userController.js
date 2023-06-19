@@ -1,6 +1,8 @@
 //THIS FILE NEEDS A LOT OF UPDATING AND CHANGING!
 const { ObjectId } = require('mongoose').Types;
-const { User, Thought } = require('../models');
+// "const { User, Thought } = require('../models');"// user and thought models are not required for this file.  We only need the user model
+
+const { User } = require('../models');
 
 // Aggregate function to get the number of user overall
 const headCount = async () =>
@@ -87,6 +89,54 @@ module.exports = {
         res.status(500).json(err);
       });
   },
+
+  updateUser(req, res) {
+    User.findOneAndUpdate(
+      { _id: req.params.userId },
+      req.body,  // Update the user with the request body
+      { new: true }  // Return the updated user
+    )
+      .then((user) =>
+        !user
+          ? res.status(404).json({ message: 'No user found with that ID :(' })
+          : res.json(user)
+      )
+      .catch((err) => res.status(500).json(err));
+  },
+
+// Add a friend to a user
+addFriend(req, res) {
+  const { userId, friendId } = req.params;
+
+  User.findOneAndUpdate(
+    { _id: userId },
+    { $addToSet: { friends: friendId } },
+    { runValidators: true, new: true }
+  )
+    .then((user) =>
+      !user
+        ? res.status(404).json({ message: 'No user found with that ID :(' })
+        : res.json(user)
+    )
+    .catch((err) => res.status(500).json(err));
+},
+
+// Remove a friend from a user
+deleteFriend(req, res) {
+  const { userId, friendId } = req.params;
+
+  User.findOneAndUpdate(
+    { _id: userId },
+    { $pull: { friends: friendId } },
+    { runValidators: true, new: true }
+  )
+    .then((user) =>
+      !user
+        ? res.status(404).json({ message: 'No user found with that ID :(' })
+        : res.json(user)
+    )
+    .catch((err) => res.status(500).json(err));
+},
 
   // Add an reaction to a user
   addReaction(req, res) {
