@@ -3,48 +3,32 @@ const { Thought, User } = require('../models');
 const thoughtData = require('./thoughtData');
 const userData = require('./userData');
 
-connection.on('error', (err) => err);
+const seedDatabase = async () => {
+  try {
+    await connection;
+    console.log('Connected to database');
 
-connection.once('open', async () => {
-  console.log('connected');
+    // Clear existing data
+    await Thought.deleteMany({});
+    await User.deleteMany({});
 
-  // Drop existing Thoughts
-  await Thought.deleteMany({});
+    // Seed users
+    const createdUsers = await User.create(userData);
 
-  // Drop existing users
-  await User.deleteMany({});
+    // Seed thoughts
+    const thoughtsWithUsers = thoughtData.map((thought) => {
+      const { username, reactions } = thought;
+      const userId = createdUsers.find((user) => user.username === username)._id;
+      return { ...thought, userId };
+    });
+    await Thought.insertMany(thoughtsWithUsers);
 
-  // Add users to the collection and await the results
-  await User.collection.insertMany(userData);
-
-  // Loop 20 times -- add users to the users array
-for (let i = 0; i < 20; i++) {
-  const reactions = getRandomReactions(20);
-
-  const fullName = getRandomName();
-  const first = fullName.split(' ')[0];
-  const last = fullName.split(' ')[1];
-  const email = `${first.toLowerCase()}@example.com`; // Example email generation
-  const username = `${first}${Math.floor(Math.random() * (99 - 18 + 1) + 18)}`;
-
-  users.push({
-    first,
-    last,
-    email,
-    username,
-    reactions,
-  });
-}
-
-  // Add Thoughts to the collection and await the results
-await Thought.insertMany([
-  {
-    thoughtName: 'My Thoughts',
-    inPerson: false,
-    users: users,
+    console.log('Seeding complete! 🌱');
+    process.exit(0);
+  } catch (error) {
+    console.error('Seeding error:', error);
+    process.exit(1);
   }
-]);
+};
 
-  console.log('Seeding complete! 🌱');
-  process.exit(0);
-});
+seedDatabase();
