@@ -28,7 +28,7 @@
       {
         "reactionName": "Like",
         "score": 90
-      },
-    ],
-  },
+      }
+    ]
+  }
 ]

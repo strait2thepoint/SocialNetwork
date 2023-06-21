@@ -1,30 +1,4 @@
-//THIS FILE NEEDS A LOT OF UPDATING AND CHANGING!
-const { ObjectId } = require('mongoose').Types;
-// "const { User, Thought } = require('../models');"// user and thought models are not required for this file.  We only need the user model
-
 const { User } = require('../models');
-
-// Aggregate function to get the number of user overall
-const headCount = async () =>
-  User.aggregate()
-    .count('userCount')
-    .then((numberOfUsers) => numberOfUsers);
-
-// Aggregate function for getting the overall grade using $avg
-const grade = async (userId) =>
-  User.aggregate([
-    // only include the given student by using $match
-    { $match: { _id: ObjectId(userId) } },
-    {
-      $unwind: '$reactions',
-    },
-    {
-      $group: {
-        _id: ObjectId(userId),
-        overallGrade: { $avg: '$reactions.score' },
-      },
-    },
-  ]);
 
 module.exports = {
   // Get all users
