@@ -1,8 +1,6 @@
 const connection = require('../config/connection');
 const { Thought, User } = require('../models');
-const thoughtData = require('./thoughtData');
-const userData = require('./userData');
-const reaction = require('../models/reaction');
+const {thoughtData, userData} = require('./seedData');
 
 const seedDatabase = async () => {
   try {
@@ -12,17 +10,17 @@ const seedDatabase = async () => {
     // Clear existing data
     await Thought.deleteMany({});
     await User.deleteMany({});
-
     // Seed users
-    const createdUsers = await User.create(userData);
+    userData.forEach(async (user) => {
+      await User.create(user)
+    })
+    console.log("users created!")
 
-    // Seed thoughts
-    const thoughtsWithUsers = thoughtData.map((thought) => {
-      const { username, reactions } = thought;
-      const userId = createdUsers.find((user) => user.username === username)._id;
-      return { ...thought, userId };
-    });
-    await Thought.insertMany(thoughtsWithUsers);
+    thoughtData.forEach(async(thought) => {
+      const newThought = await Thought.create(thought)
+      await User.findOneAndUpdate({username: newThought.username},
+        { $push: { thoughts: newThought._id } })
+    })
 
     console.log('Seeding complete! 🌱');
     process.exit(0);

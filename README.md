@@ -19,3 +19,7 @@ POST: Creates a new reaction for a thought
 DELETE: Deletes a reaction by its ID from a thought
 
 With this code, your base API route is /api, and you can append the respective paths for different endpoints, such as /thoughts, /thoughts/:thoughtId, /thoughts/:thoughtId/reactions, and /thoughts/:thoughtId/reactions/:reactionId.
+
+## Citations:
+I worked with Anuja Lawankar to complete this project.
+ 

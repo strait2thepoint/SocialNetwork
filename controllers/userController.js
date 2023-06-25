@@ -1,14 +1,12 @@
-const { User } = require('../models');
+const { User, Thought } = require('../models');
 
 module.exports = {
   // Get all users
   getUsers(req, res) {
     User.find()
       .then(async (users) => {
-        const userObj = {
-          users,
-        };
-        return res.json(userObj);
+        
+        return res.json(users);
       })
       .catch((err) => {
         console.log(err);
@@ -17,7 +15,7 @@ module.exports = {
   },
   // Get a single user
   getSingleUser(req, res) {
-    User.findOne({ _id: req.params.userId })
+    User.findOne({ _id: req.params.userId }).populate("thoughts")
       .select('-__v')
       .then(async (user) =>
         !user
@@ -33,9 +31,12 @@ module.exports = {
   },
   // create a new user
   createUser(req, res) {
+    console.log("Making user")
+console.log(req.body)
     User.create(req.body)
       .then((user) => res.json(user))
-      .catch((err) => res.status(500).json(err));
+      .catch((err) => { console.log(err)
+        res.status(500).json(err)});
   },
   // Delete a user and remove them from the thought
   deleteUser(req, res) {
