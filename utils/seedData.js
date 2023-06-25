@@ -21,6 +21,10 @@ const userData =[
     "email": "isabella@example.com",
     "username": "isasmith45"
    
+  },
+  {
+    "thoughtText": "Excited for the weekend and spending time with friends.",
+    "username": "SophiaDavis"
   }
 ]
 
